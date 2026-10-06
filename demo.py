@@ -32,7 +32,7 @@ import numpy as np
 from smartcrop.detect import ensure_face_weights, get_detector
 from smartcrop.pipeline import reframe
 from smartcrop.plan import Director
-from smartcrop.probe import probe
+from smartcrop.probe import display_size, ensure_upright
 from smartcrop.utils import ROOT, VIDEO_EXTENSIONS, center_x, crop_width
 
 MAX_DURATION_S = 20
@@ -162,7 +162,7 @@ def validate_clip(src: Path, meta: dict) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
     duration = float(meta.get("duration") or 0)
-    width, height = int(meta["width"]), int(meta["height"])
+    width, height = display_size(meta)
     size_mb = src.stat().st_size / 1e6
 
     if duration > MAX_DURATION_S:
@@ -190,22 +190,13 @@ def validate_clip(src: Path, meta: dict) -> tuple[list[str], list[str]]:
             "This looks closer to square or portrait. Results are best on 16:9 landscape."
         )
 
-    if meta.get("rotation"):
-        warnings.append(
-            "This file has rotation metadata. If the crop looks sideways, "
-            "normalize orientation first."
-        )
-
     return errors, warnings
 
 
 def make_video_input() -> gr.Video:
-    constraints = {
-        "facingMode": {"ideal": "environment"},
-        "aspectRatio": {"ideal": 16 / 9},
-        "width": {"ideal": 1280},
-        "height": {"ideal": 720},
-    }
+    # Do not force 16:9 / 1280x720 — Safari on iPhone then records landscape
+    # back-camera clips upside down. Prefer the rear camera; no selfie mirror.
+    constraints = {"facingMode": {"ideal": "environment"}}
     kwargs = dict(
         label="Record or upload",
         sources=["webcam", "upload"],
@@ -214,7 +205,10 @@ def make_video_input() -> gr.Video:
         elem_id="source-video",
     )
     if hasattr(gr, "WebcamOptions"):
-        kwargs["webcam_options"] = gr.WebcamOptions(constraints=constraints)
+        kwargs["webcam_options"] = gr.WebcamOptions(
+            mirror=False,
+            constraints=constraints,
+        )
         kwargs["buttons"] = ["download"]
         try:
             return gr.Video(**kwargs)
@@ -237,21 +231,21 @@ def reframe_clip(video):
     if not ffmpeg_available():
         raise gr.Error("ffmpeg was not found. On Spaces, packages.txt should install it.")
 
-    try:
-        meta = probe(src)
-    except Exception as exc:
-        raise gr.Error(f"Could not read this file. Try an H.264 MP4. ({exc})") from exc
-
-    errors, warnings = validate_clip(src, meta)
-    for warning in warnings:
-        gr.Warning(warning)
-    if errors:
-        raise gr.Error(errors[0])
-
     suffix = src.suffix.lower() if src.suffix.lower() in VIDEO_EXTENSIONS else ".mp4"
     work_src = WORK / f"source-{uuid.uuid4().hex[:8]}{suffix}"
     work_dst = WORK / f"portrait-{uuid.uuid4().hex[:8]}.mp4"
     shutil.copy2(src, work_src)
+
+    try:
+        work_src, meta = ensure_upright(work_src)
+    except Exception as exc:
+        raise gr.Error(f"Could not read this file. Try an H.264 MP4. ({exc})") from exc
+
+    errors, warnings = validate_clip(work_src, meta)
+    for warning in warnings:
+        gr.Warning(warning)
+    if errors:
+        raise gr.Error(errors[0])
 
     try:
         load_models()
@@ -286,6 +280,10 @@ while keeping the important subject in frame.
         )
 
     source = make_video_input()
+    gr.Markdown(
+        "On iPhone: turn the phone sideways **before** you hit Record. "
+        "If Safari still flips the clip, record in the Camera app and tap **Upload**."
+    )
     reframe_btn = gr.Button("Reframe", variant="primary", elem_id="reframe-btn")
     status = gr.Markdown(visible=True, value="")
     result = gr.Video(

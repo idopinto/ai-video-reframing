@@ -41,9 +41,7 @@ def probe(path: Path) -> dict:
     if n_frames <= 0 and fps > 0 and duration > 0:
         n_frames = int(round(duration * fps))
 
-    rotation = 0
-    for side in video.get("side_data_list", []):
-        rotation = side.get("rotation", rotation)
+    rotation = _rotation_degrees(video)
 
     return {
         "file": path.name,
@@ -102,3 +100,66 @@ def _with_derived(df: pd.DataFrame) -> pd.DataFrame:
     df["center_x"] = df["x_max"] // 2
     df["mbps"] = df["size_mb"] * 8 / df["duration"].replace(0, pd.NA)
     return df
+
+
+def _rotation_degrees(video: dict) -> int:
+    rotation = 0.0
+    tags = video.get("tags") or {}
+    if tags.get("rotate") not in (None, ""):
+        rotation = float(tags["rotate"])
+    for side in video.get("side_data_list") or []:
+        if side.get("rotation") is not None:
+            rotation = float(side["rotation"])
+    return int(round(rotation)) % 360
+
+
+def display_size(meta: dict) -> tuple[int, int]:
+    """Width and height as shown on screen, after rotation metadata."""
+    width, height = int(meta["width"]), int(meta["height"])
+    if int(meta.get("rotation") or 0) % 180 == 90:
+        return height, width
+    return width, height
+
+
+def ensure_upright(src: Path) -> tuple[Path, dict]:
+    """Re-encode so pixels match what you see; strip rotation tags."""
+    src = Path(src)
+    meta = probe(src)
+    if int(meta.get("rotation") or 0) % 360 == 0:
+        return src, meta
+
+    dst = src.with_name(f"{src.stem}_upright.mp4")
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-v",
+        "error",
+        "-i",
+        str(src),
+        "-vf",
+        "scale=trunc(iw/2)*2:trunc(ih/2)*2",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "veryfast",
+        "-crf",
+        "18",
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
+        "-metadata:s:v:0",
+        "rotate=0",
+    ]
+    audio = ["-c:a", "copy"] if meta.get("acodec") else ["-an"]
+    result = subprocess.run(cmd + audio + [str(dst)], capture_output=True, text=True)
+    if result.returncode != 0 and meta.get("acodec"):
+        result = subprocess.run(
+            cmd + ["-c:a", "aac", "-b:a", "128k", str(dst)],
+            capture_output=True,
+            text=True,
+        )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip() or f"exit {result.returncode}"
+        raise RuntimeError(f"ffmpeg failed to fix orientation: {detail}")
+    return dst, probe(dst)

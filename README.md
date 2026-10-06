@@ -193,7 +193,7 @@ Local library in `data/videos/`. Compare planners, overlay boxes, plot `x(t)`, a
 - One subject per clip, chosen once. Speaker changes and two equally important people are not handled.
 - Detection stride is 3 frames. Very short events can be missed, and tracks can end a frame or two early.
 - Unusual subjects (tiny figures, heavy occlusion, non-person action) can fall through the filter and yield a centre crop.
-- Phone videos with rotation metadata may probe as portrait while the stored pixels are landscape. Normalize orientation first if results look wrong.
+- Phone videos with rotation tags are straightened before cropping. Safari’s in-page back camera can still record landscape upside down; Upload from the Camera app avoids that.
 - Scene cuts are not detected. A cut to a new subject will keep following the original track until it dies, then ease to centre.
 - First-run downloads and YOLO inference are compute-heavy. The evaluation Streamlit app stays on CPU on Apple Silicon to avoid a Metal-on-background-thread crash; the CLI can use MPS or CUDA. The hosted demo uses YOLO11n for that reason.
 
