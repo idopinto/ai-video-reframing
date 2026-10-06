@@ -1,8 +1,9 @@
-# Hugging Face Spaces (CPU). App file: demo.py
+# Hugging Face Spaces (ZeroGPU). App file: demo.py
 # System ffmpeg is installed from packages.txt.
 # Gradio is provided by the Space SDK — do not pin it here.
+# `spaces` must be imported before torch (see demo.py).
 
---extra-index-url https://download.pytorch.org/whl/cpu
+spaces
 torch
 torchvision
 opencv-python-headless>=4.10

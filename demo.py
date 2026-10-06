@@ -4,11 +4,15 @@ Public Gradio demo for Smart Video Reframing.
 Thin UI around smartcrop.pipeline.reframe. Built for phones first and Hugging Face
 Spaces: short clips, YOLO11n, temporary files, Gradio webcam + upload.
 
+Zero-cost host: a Gradio Space on ZeroGPU (free accounts get two). CPU Gradio
+Spaces require Pro. `import spaces` must happen before torch.
+
     uv run python demo.py
 """
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
@@ -16,6 +20,11 @@ import tempfile
 import uuid
 from dataclasses import replace
 from pathlib import Path
+
+try:
+    import spaces
+except ImportError:
+    spaces = None
 
 import gradio as gr
 import numpy as np
@@ -91,6 +100,15 @@ def ffmpeg_available() -> bool:
         return False
 
 
+def gpu(*, duration: int = 60):
+    def deco(fn):
+        if spaces is None:
+            return fn
+        return spaces.GPU(duration=duration)(fn)
+
+    return deco
+
+
 def load_models() -> None:
     global _MODELS_READY
     if _MODELS_READY:
@@ -153,7 +171,7 @@ def validate_clip(src: Path, meta: dict) -> tuple[list[str], list[str]]:
         )
     elif duration >= WARN_DURATION_S:
         warnings.append(
-            f"{duration:.0f}s is near the demo limit. Rendering on CPU can take a minute."
+            f"{duration:.0f}s is near the demo limit. Rendering can take a minute."
         )
 
     if size_mb > MAX_UPLOAD_MB:
@@ -178,6 +196,12 @@ def validate_clip(src: Path, meta: dict) -> tuple[list[str], list[str]]:
         )
 
     return errors, warnings
+
+
+@gpu(duration=60)
+def run_reframe(src: str, dst: str, meta: dict):
+    load_models()
+    return reframe(Path(src), Path(dst), DEMO_PLANNER, meta)
 
 
 def make_video_input() -> gr.Video:
@@ -234,8 +258,7 @@ def reframe_clip(video):
     shutil.copy2(src, work_src)
 
     try:
-        load_models()
-        decision = reframe(work_src, work_dst, DEMO_PLANNER, meta)
+        decision = run_reframe(str(work_src), str(work_dst), meta)
     except Exception as exc:
         raise gr.Error(f"Reframe failed. {exc}") from exc
 
@@ -248,6 +271,10 @@ def reframe_clip(video):
         caption,
         gr.update(visible=True, value=str(work_dst)),
     )
+
+
+if os.environ.get("SPACE_ID"):
+    load_models()
 
 
 with gr.Blocks(title="Smart Video Reframing") as demo:

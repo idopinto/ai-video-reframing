@@ -109,15 +109,22 @@ uv sync
 uv run python demo.py
 ```
 
-**Deploy on Hugging Face Spaces**
+**Hosted demo (zero cost)**
 
-1. Create a Gradio Space with `app_file: demo.py` and Python 3.12.
-2. Spaces installs pip packages from `requirements.txt` and system `ffmpeg` from `packages.txt`.
-3. If the browser blocks camera recording, **Upload** still works.
+A public URL for this demo is free on Hugging Face **ZeroGPU**. CPU Gradio Spaces need a paid plan; free accounts can still host **up to two** Gradio Spaces on ZeroGPU, with no hourly charge. Visitors spend their own daily GPU quota (about five minutes on the free tier).
+
+1. Create a Space at [huggingface.co/new-space](https://huggingface.co/new-space): SDK **Gradio**, hardware **ZeroGPU**, Python **3.12**, app file **`demo.py`**.
+2. Connect this GitHub repo, or `git push` to `https://huggingface.co/spaces/<you>/smart-video-reframing`.
+3. Spaces installs Python packages from `requirements.txt` and system `ffmpeg` from `packages.txt`.
+4. If the browser blocks camera recording, **Upload** still works.
+
+Keep the Space README YAML on the Space itself (GitHub’s README stays a normal markdown file). Set `sdk: gradio`, `app_file: demo.py`, and `python_version: "3.12"` there.
+
+A laptop-only Gradio **share** link also costs nothing, but it dies when you quit. Add `share=True` to `launch()` in `demo.py` while you need it.
 
 **Hosted-demo constraints**
 
-The free Space CPU is limited, so the public demo:
+ZeroGPU quota is short, so the public demo:
 
 - accepts clips up to **20 seconds** and **100 MB**
 - uses **YOLO11n** instead of YOLO11m
@@ -207,6 +214,7 @@ No published accuracy numbers are claimed here. Compare methods visually in the 
 - Configurable output aspects (1:1, 4:5) and optional vertical motion
 - Explicit handling of already-portrait or rotated inputs
 - Learned crop quality instead of the current span threshold
+- Automatic evaluation framework with a VLM-as-a-judge (score subject framing, hold vs follow, and stability against centre / naive-track)
 - Optional letterbox fallback when a subject cannot be framed
 
 ## License
