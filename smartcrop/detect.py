@@ -175,9 +175,11 @@ class Detector:
 
 
 @lru_cache(maxsize=4)
-def get_detector(model: str = DEFAULT_MODEL, conf: float = 0.25) -> Detector:
+def get_detector(
+    model: str = DEFAULT_MODEL, conf: float = 0.25, device: str | None = None
+) -> Detector:
     """One detector per (model, conf), so weights load once."""
-    return Detector(model=model, conf=conf)
+    return Detector(model=model, conf=conf, device=device)
 
 
 def cache_path(

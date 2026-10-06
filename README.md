@@ -100,6 +100,8 @@ uv run python -m smartcrop batch --videos /path/to/clips --out /path/to/out --pl
 
 ## Live Demo
 
+**Hosted:** [huggingface.co/spaces/idopinto/smart-video-reframing](https://huggingface.co/spaces/idopinto/smart-video-reframing)
+
 `demo.py` is a mobile-first Gradio UI. Record a short landscape clip on your phone or upload one, then download a 9:16 crop. It calls the same `reframe()` pipeline as the CLI.
 
 **Run locally**
@@ -109,18 +111,9 @@ uv sync
 uv run python demo.py
 ```
 
-**Hosted demo (zero cost)**
+The Space runs on Hugging Face **ZeroGPU** (no hourly charge). Visitors spend their own daily GPU quota. CPU Gradio Spaces need a paid plan.
 
-A public URL for this demo is free on Hugging Face **ZeroGPU**. CPU Gradio Spaces need a paid plan; free accounts can still host **up to two** Gradio Spaces on ZeroGPU, with no hourly charge. Visitors spend their own daily GPU quota (about five minutes on the free tier).
-
-1. Create a Space at [huggingface.co/new-space](https://huggingface.co/new-space): SDK **Gradio**, hardware **ZeroGPU**, Python **3.12**, app file **`demo.py`**.
-2. Connect this GitHub repo, or `git push` to `https://huggingface.co/spaces/<you>/smart-video-reframing`.
-3. Spaces installs Python packages from `requirements.txt` and system `ffmpeg` from `packages.txt`.
-4. If the browser blocks camera recording, **Upload** still works.
-
-Keep the Space README YAML on the Space itself (GitHub’s README stays a normal markdown file). Set `sdk: gradio`, `app_file: demo.py`, and `python_version: "3.12"` there.
-
-A laptop-only Gradio **share** link also costs nothing, but it dies when you quit. Add `share=True` to `launch()` in `demo.py` while you need it.
+If the browser blocks camera recording, **Upload** still works.
 
 **Hosted-demo constraints**
 

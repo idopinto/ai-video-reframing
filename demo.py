@@ -113,7 +113,8 @@ def load_models() -> None:
     global _MODELS_READY
     if _MODELS_READY:
         return
-    get_detector(model=DEMO_MODEL)
+    device = "cuda" if spaces is not None else None
+    get_detector(model=DEMO_MODEL, device=device)
     ensure_face_weights()
     _MODELS_READY = True
 
@@ -198,12 +199,6 @@ def validate_clip(src: Path, meta: dict) -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
-@gpu(duration=60)
-def run_reframe(src: str, dst: str, meta: dict):
-    load_models()
-    return reframe(Path(src), Path(dst), DEMO_PLANNER, meta)
-
-
 def make_video_input() -> gr.Video:
     constraints = {
         "facingMode": {"ideal": "environment"},
@@ -234,6 +229,7 @@ def make_video_input() -> gr.Video:
         return gr.Video(**kwargs)
 
 
+@gpu(duration=60)
 def reframe_clip(video):
     src = as_path(video)
     if src is None:
@@ -258,7 +254,8 @@ def reframe_clip(video):
     shutil.copy2(src, work_src)
 
     try:
-        decision = run_reframe(str(work_src), str(work_dst), meta)
+        load_models()
+        decision = reframe(work_src, work_dst, DEMO_PLANNER, meta)
     except Exception as exc:
         raise gr.Error(f"Reframe failed. {exc}") from exc
 
@@ -266,11 +263,7 @@ def reframe_clip(video):
         raise gr.Error("Reframe finished without writing a video. Try another clip.")
 
     caption = framing_copy(decision, meta)
-    return (
-        gr.update(value=str(work_dst), visible=True),
-        caption,
-        gr.update(visible=True, value=str(work_dst)),
-    )
+    return str(work_dst), caption, str(work_dst)
 
 
 if os.environ.get("SPACE_ID"):
@@ -300,12 +293,10 @@ while keeping the important subject in frame.
         interactive=False,
         include_audio=True,
         elem_id="result-video",
-        visible=False,
     )
 
     download = gr.DownloadButton(
         "Download Result",
-        visible=False,
         elem_id="download-btn",
     )
 
@@ -345,11 +336,7 @@ If the browser blocks camera recording, use **Upload**.
         api_name="reframe",
     )
     source.change(
-        fn=lambda: (
-            gr.update(value=None, visible=False),
-            "",
-            gr.update(visible=False, value=None),
-        ),
+        fn=lambda: (None, "", None),
         inputs=None,
         outputs=[result, status, download],
         show_progress="hidden",

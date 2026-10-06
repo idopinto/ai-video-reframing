@@ -1,10 +1,7 @@
-# Hugging Face Spaces (ZeroGPU). App file: demo.py
+# Hugging Face Spaces (ZeroGPU / Gradio). App file: demo.py
 # System ffmpeg is installed from packages.txt.
-# Gradio is provided by the Space SDK — do not pin it here.
-# `spaces` must be imported before torch (see demo.py).
+# Do not pin gradio, spaces, huggingface_hub, or torch — the Space image owns those.
 
-spaces
-torch
 torchvision
 opencv-python-headless>=4.10
 lap>=0.5.13
