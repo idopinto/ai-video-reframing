@@ -1,15 +1,3 @@
----
-title: Smart Video Reframing
-emoji: 🎞️
-colorFrom: yellow
-colorTo: indigo
-sdk: gradio
-sdk_version: 6.29.1
-app_file: demo.py
-python_version: "3.12"
-short_description: Landscape to 9:16 with subject-aware crop
----
-
 # Smart Video Reframing
 
 Smart Video Reframing is an automatic 16:9 to 9:16 video reframing pipeline that combines object detection, tracking, face-aware subject framing, and temporal smoothing to produce stable portrait crops.
@@ -112,7 +100,7 @@ uv run python -m smartcrop batch --videos /path/to/clips --out /path/to/out --pl
 
 ## Live Demo
 
-Public portfolio app (`demo.py`): a mobile-first Gradio UI. Record a short landscape clip on your phone or upload one, then download a 9:16 crop. It calls the same `reframe()` pipeline as the CLI.
+`demo.py` is a mobile-first Gradio UI. Record a short landscape clip on your phone or upload one, then download a 9:16 crop. It calls the same `reframe()` pipeline as the CLI.
 
 **Run locally**
 
@@ -123,8 +111,8 @@ uv run python demo.py
 
 **Deploy on Hugging Face Spaces**
 
-1. Create a Gradio Space with `app_file: demo.py` (this README already has the Spaces frontmatter).
-2. Spaces installs Python 3.12, pip packages from `requirements.txt`, and system `ffmpeg` from `packages.txt`.
+1. Create a Gradio Space with `app_file: demo.py` and Python 3.12.
+2. Spaces installs pip packages from `requirements.txt` and system `ffmpeg` from `packages.txt`.
 3. If the browser blocks camera recording, **Upload** still works.
 
 **Hosted-demo constraints**
@@ -145,7 +133,7 @@ Optional: put a few rights-cleared 16:9 clips in `examples/` so visitors can try
 
 | Feature | `demo.py` | `app.py` |
 | --- | --- | --- |
-| Audience | Hosted portfolio demo | Local research / debugging |
+| Audience | Public web demo | Local research / debugging |
 | UI | Gradio (mobile-first) | Streamlit |
 | Detector | YOLO11n | YOLO11m by default |
 | Methods | Smart crop only | `center`, `naive-track`, `director` |
