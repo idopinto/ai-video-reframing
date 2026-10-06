@@ -102,7 +102,7 @@ uv run python -m smartcrop batch --videos /path/to/clips --out /path/to/out --pl
 
 **Hosted:** [huggingface.co/spaces/idopinto/smart-video-reframing](https://huggingface.co/spaces/idopinto/smart-video-reframing)
 
-`demo.py` is a mobile-first Gradio UI. Record a short landscape clip on your phone or upload one, then download a 9:16 crop. It calls the same `reframe()` pipeline as the CLI.
+`demo.py` is a mobile-first Gradio UI. Upload a short landscape clip, then download a 9:16 crop. It calls the same `reframe()` pipeline as the CLI.
 
 **Run locally**
 
@@ -112,8 +112,6 @@ uv run python demo.py
 ```
 
 The Space runs on Hugging Face **ZeroGPU** (no hourly charge). Visitors spend their own daily GPU quota. CPU Gradio Spaces need a paid plan.
-
-If the browser blocks camera recording, **Upload** still works.
 
 **Hosted-demo constraints**
 
@@ -138,7 +136,7 @@ Optional: put a few rights-cleared 16:9 clips in `examples/` so visitors can try
 | Detector | YOLO11n | YOLO11m by default |
 | Methods | Smart crop only | `center`, `naive-track`, `director` |
 | Storage | Temp dirs | `data/videos/`, `outputs/` |
-| Extra UI | Record / upload → Reframe → download | Mode filters, overlays, hyperparameters |
+| Extra UI | Upload → Reframe → download | Mode filters, overlays, hyperparameters |
 
 ## Evaluation app
 

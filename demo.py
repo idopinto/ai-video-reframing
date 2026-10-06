@@ -2,7 +2,7 @@
 Public Gradio demo for Smart Video Reframing.
 
 Thin UI around smartcrop.pipeline.reframe. Built for phones first and Hugging Face
-Spaces: short clips, YOLO11n, temporary files, Gradio webcam + upload.
+Spaces: short clips, YOLO11n, temporary files, Gradio upload.
 
 Zero-cost host: a Gradio Space on ZeroGPU (free accounts get two). CPU Gradio
 Spaces require Pro. `import spaces` must happen before torch.
@@ -183,7 +183,7 @@ def validate_clip(src: Path, meta: dict) -> tuple[list[str], list[str]]:
     if crop_width(height) >= width:
         errors.append(
             "This clip is too tall for a full-height 9:16 crop. "
-            "Hold the phone sideways and record landscape."
+            "Use a landscape 16:9 video."
         )
     elif width / max(height, 1) < 1.2:
         warnings.append(
@@ -200,40 +200,20 @@ def validate_clip(src: Path, meta: dict) -> tuple[list[str], list[str]]:
 
 
 def make_video_input() -> gr.Video:
-    constraints = {
-        "facingMode": {"ideal": "environment"},
-        "aspectRatio": {"ideal": 16 / 9},
-        "width": {"ideal": 1280},
-        "height": {"ideal": 720},
-    }
-    kwargs = dict(
-        label="Record or upload",
-        sources=["webcam", "upload"],
+    return gr.Video(
+        label="Upload",
+        sources=["upload"],
         format="mp4",
         include_audio=True,
         elem_id="source-video",
     )
-    if hasattr(gr, "WebcamOptions"):
-        kwargs["webcam_options"] = gr.WebcamOptions(constraints=constraints)
-        kwargs["buttons"] = ["download"]
-        try:
-            return gr.Video(**kwargs)
-        except TypeError:
-            kwargs.pop("webcam_options", None)
-            kwargs.pop("buttons", None)
-    kwargs["webcam_constraints"] = constraints
-    try:
-        return gr.Video(**kwargs)
-    except TypeError:
-        kwargs.pop("webcam_constraints", None)
-        return gr.Video(**kwargs)
 
 
 @gpu(duration=60)
 def reframe_clip(video):
     src = as_path(video)
     if src is None:
-        raise gr.Error("Record or upload a short landscape video first.")
+        raise gr.Error("Upload a short landscape video first.")
     if not ffmpeg_available():
         raise gr.Error("ffmpeg was not found. On Spaces, packages.txt should install it.")
 
@@ -322,8 +302,7 @@ The crop stays full height. The app only decides where to place the 9:16 window.
 7. Smooth the camera, then crop to 9:16
 
 Hosted-demo limits: **{MAX_DURATION_S}s**, **{MAX_UPLOAD_MB} MB**, YOLO11n.  
-Longer clips and YOLO11m live in the CLI (`python -m smartcrop`) and `app.py`.  
-If the browser blocks camera recording, use **Upload**.
+Longer clips and YOLO11m live in the CLI (`python -m smartcrop`) and `app.py`.
 """
         )
 
