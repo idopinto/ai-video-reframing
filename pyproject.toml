@@ -3,6 +3,7 @@ name = "ai-video-reframing"
 version = "0.1.0"
 description = "Automatic 16:9 → 9:16 video reframing using object detection, tracking, face-aware framing, temporal smoothing, and FFmpeg."
 readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.11"
 dependencies = [
     "gradio>=5.49",

@@ -223,4 +223,4 @@ No published accuracy numbers are claimed here. Compare methods visually in the 
 
 ## License
 
-Personal portfolio code. No SPDX license is granted; see `LICENSE`. Ultralytics YOLO remains AGPL-3.0.
+This project is MIT licensed. See `LICENSE`. Ultralytics YOLO remains AGPL-3.0.
