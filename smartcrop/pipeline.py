@@ -12,7 +12,7 @@ from pathlib import Path
 import pandas as pd
 
 from smartcrop.plan import DEFAULT_PLANNER, PLANNERS, Decision, Planner
-from smartcrop.probe import ensure_upright, probe
+from smartcrop.probe import probe
 from smartcrop.render import render
 from smartcrop.utils import list_videos, portrait_name
 
@@ -27,7 +27,7 @@ def reframe(
     src, dst = Path(src), Path(dst)
     if not src.exists():
         raise FileNotFoundError(f"input video not found: {src}")
-    src, meta = ensure_upright(src)
+    meta = meta if meta is not None else probe(src)
     decision = planner(src, meta)
     render(src, dst, decision.x, meta)
     return decision
