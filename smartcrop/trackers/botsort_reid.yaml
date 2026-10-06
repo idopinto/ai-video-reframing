@@ -1,0 +1,13 @@
+# BoT-SORT with appearance ReID on (Ultralytics defaults otherwise)
+tracker_type: botsort # (str) Tracker backend: botsort
+track_high_thresh: 0.25 # (float) First-stage match threshold. Raise for cleaner tracks, lower to keep more
+track_low_thresh: 0.1 # (float) Second-stage threshold for low-score matches. Balances recovery vs drift
+new_track_thresh: 0.25 # (float) Start a new track if no match ≥ this. Higher reduces false tracks
+track_buffer: 30 # (int) Frames to keep lost tracks alive. Higher handles occlusion, increases ID switches risk
+match_thresh: 0.8 # (float) Association similarity threshold (IoU/cost). Tune with detector quality
+fuse_score: True # (bool) Fuse detection score with motion/IoU for matching. Stabilizes weak detections
+gmc_method: sparseOptFlow # (str) Global motion compensation: sparseOptFlow|orb|sift|ecc|none. Helps moving camera scenes
+proximity_thresh: 0.5 # (float) Min IoU to consider tracks proximate for ReID. Higher is stricter
+appearance_thresh: 0.8 # (float) Min appearance similarity for ReID. Raise to avoid identity swaps
+with_reid: True # (bool) Enable ReID model use. Needs extra model and compute
+model: auto # (str) ReID model name/path. "auto" uses detector features if available

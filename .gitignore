@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[oc]
+*.egg-info/
+build/
+dist/
+wheels/
+
+# Virtual environments
+.venv/
+venv/
+
+# Regenerated pipeline artifacts
+cache/
+outputs/
+
+# User-provided videos (keep the folder, not the files)
+data/videos/*
+!data/videos/.gitkeep
+data/titles.csv
+
+# Optional demo examples — add locally, do not commit footage
+examples/*
+!examples/README.md
+!examples/.gitkeep
+
+# Downloaded model weights
+*.pt
+*.onnx
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Gradio
+.gradio/
+
+# Private resume / GitHub notes — do not publish
+PORTFOLIO_NOTES.md
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Jupyter
+.ipynb_checkpoints/

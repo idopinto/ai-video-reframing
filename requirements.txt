@@ -1,0 +1,15 @@
+# Hugging Face Spaces (CPU). App file: demo.py
+# System ffmpeg is installed from packages.txt.
+# Gradio is provided by the Space SDK — do not pin it here.
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+opencv-python-headless>=4.10
+lap>=0.5.13
+numpy>=2.0
+pandas>=2.2
+pyarrow>=17
+scipy>=1.14
+tqdm>=4.66
+ultralytics>=8.3
